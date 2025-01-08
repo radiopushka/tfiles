@@ -69,3 +69,4 @@ Feel free to fork and submit pull requests. Contributions for performance improv
 ## License
 This project is licensed under the GPL License.
 
+![2025-01-07_23-06](https://github.com/user-attachments/assets/776beb66-5c0b-46d4-ada9-14d94f828f54)

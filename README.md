@@ -17,6 +17,7 @@
 - libpng library
 - libjpeg library
 - POSIX-compliant system
+- 256 color terminal like st
 
 ## Installation
 1. Clone the repository:

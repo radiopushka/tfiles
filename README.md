@@ -14,7 +14,8 @@
 
 ## Requirements
 - GCC or compatible C compiler
-- ncurses library
+- libpng library
+- libjpeg library
 - POSIX-compliant system
 
 ## Installation

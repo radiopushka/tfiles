@@ -70,3 +70,8 @@ Feel free to fork and submit pull requests. Contributions for performance improv
 This project is licensed under the GPL License.
 
 ![2025-01-07_23-06](https://github.com/user-attachments/assets/776beb66-5c0b-46d4-ada9-14d94f828f54)
+
+![2025-01-07_23-09](https://github.com/user-attachments/assets/63209e2b-d066-48e4-b4d5-a6f813ec08ef)
+
+![2025-01-07_23-12](https://github.com/user-attachments/assets/3e2d7a74-ee51-45e5-b0ae-982183cb8a72)
+

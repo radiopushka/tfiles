@@ -33,7 +33,7 @@
 char* ics_endings[]={
   "wav","ogg","mp3",
   "mp4","mkv","mov","av","webm",
-  "jpg","jpeg","png","svg","webp",
+  "jpg","jpeg","png","svg","webp","gif",
   "pdf",
   "tar","zip","gunzip","gzip","xz","gz",
   "doc","docx","odt"
@@ -41,7 +41,7 @@ char* ics_endings[]={
 int* ics_iconptr[ICONSIZE]={
   AUDIO,AUDIO,AUDIO,
   VIDEO,VIDEO,VIDEO,VIDEO,VIDEO,
-  IMAGE,IMAGE,IMAGE,IMAGE,IMAGE,
+  IMAGE,IMAGE,IMAGE,IMAGE,IMAGE,IMAGE,
   PDF,
   ARCH,ARCH,ARCH,ARCH,ARCH,ARCH,
   DOC,DOC,DOC

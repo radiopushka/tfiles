@@ -65,5 +65,5 @@
 Feel free to fork and submit pull requests. Contributions for performance improvements and feature additions are welcome.
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the GPL License.
 

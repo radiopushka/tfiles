@@ -40,12 +40,13 @@
 - **/ (Forward Slash):** Search for a file
 - **Spacebar:** Open options popup
 - **r:** Refresh current directory view
-- **q:** Quit the program
+- **ESC:** Quit the program
 
 ### File Operations
 - **Delete:** Press `Space` -> `d` to delete the selected file
 - **Copy:** Press `Space` -> `b` to set file buffer, then `Space` -> `c` to paste here
 - **Move:** Press `Space` -> `b` to set file buffer, then `Space` -> `m` to move here
+- Press `Space` for more information
 
 ### Terminal Commands
 - Press `Space` -> `t` to enter a custom terminal command for the selected file or directory.

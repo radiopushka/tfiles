@@ -1,6 +1,7 @@
 # Tfiles - Terminal-Based File Manager
 
 `tfiles` is a terminal-based file manager designed for efficient file navigation and management directly from the command line interface.
+It should work over SSH.
 
 ## Features
 - **Directory Navigation:** Traverse through directories using keyboard arrows.

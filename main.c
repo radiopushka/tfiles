@@ -157,6 +157,15 @@ int display_directory(char* path,char** ndirptr){
   closedir(d);
   setenv("CDDIR",path,1);
 
+  if(dd_ptr==NULL&&(strcmp("/",path)!=0)){
+
+    //this device does not support ".." as a valid go back signal
+    struct FileInfo* bbk;
+    init_file(&bbk,"..",1,path);
+    dd_ptr=bbk;
+
+  }
+
   struct FileInfo* mfinf[count];
   int tsize=count;
 

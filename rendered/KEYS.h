@@ -7,5 +7,9 @@
 #define K_ESC 27
 #define K_BACK 127
 
+#define CTRLC 3
+#define CTRLX 24
+#define CTRLV 27
+
 #define PG_UP 2117425947
 #define PG_DN 2117491483

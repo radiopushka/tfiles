@@ -132,6 +132,7 @@ int display_directory(char* path,char** ndirptr){
   int ret_val_futsu=1;
 
   int count=0;
+  struct FileInfo* dd_ptr=NULL;
   while((dinf=readdir(d))!=NULL){
     if(strcmp(dinf->d_name,".")!=0 && !(strcmp(dinf->d_name,"..")==0&&strcmp(path,"/")==0)){
       struct dir_holder* dhi=malloc(sizeof(struct dir_holder));
@@ -143,6 +144,10 @@ int display_directory(char* path,char** ndirptr){
         isdir=1;
       }
       init_file(&finf,dinf->d_name,isdir,path);
+      if(strcmp(dinf->d_name,"..")==0){
+        dd_ptr=finf;
+      }
+
       dh->ff=finf;
       count++;
     }
@@ -157,27 +162,28 @@ int display_directory(char* path,char** ndirptr){
 
   count=0;
 
-  if(strcmp(path,"/")!=0){
-    count=1;
-  }
 
+  struct FileInfo** ptr_itter=mfinf;
+  if(dd_ptr!=NULL){
+    ptr_itter++;
+  }
   if(dh!=NULL)
-  while(dh->next!=NULL){
+  while(dh!=NULL){
     
-    mfinf[count]=dh->ff;
-    count++;
+    if(dh->ff!=dd_ptr){
+        *ptr_itter=dh->ff;
+        ptr_itter++;
+    }
     struct dir_holder* tsugi=dh->next;
     free(dh);
     dh=tsugi;
   }
  
-  if(strcmp(path,"/")==0){
-    mfinf[count]=dh->ff;
-    sort_file_structure(0,count+1,mfinf);
-  }else{
-    mfinf[0]=dh->ff;
-    sort_file_structure(1,count,mfinf);
+  if(dd_ptr!=NULL){
+    *mfinf=dd_ptr;
   }
+  sort_file_structure(0,count,mfinf);
+  
   free(dh);
   dh=NULL;
 
@@ -194,7 +200,7 @@ int display_directory(char* path,char** ndirptr){
   }
   int sel=0;
 
-  while(c!=K_ESC){
+  while(c!=K_ESC && c!=CTRLX){
 
    
 

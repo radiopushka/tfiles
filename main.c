@@ -355,13 +355,17 @@ int display_directory(char* path,char** ndirptr){
       show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here",tw>>1,th>>1);
       fflush(stdout);
       int character=wgetch();
+      char* cmd=NULL;
+      char* tmp;
+      char* loc;
+      char* npath;
 
       switch(character){
         case 'r':
           goto f_refresh;
           break;
         case 't':
-          char* cmd=input_dialogue("cmd(%d,%f,%b)",prev_cmd2,tw/3,th>>1,tw/3);
+          cmd=input_dialogue("cmd(%d,%f,%b)",prev_cmd2,tw/3,th>>1,tw/3);
           if(cmd!=NULL){
               str_cpy(cmd,&prev_cmd2);
               pre_process_cmd_data(&cmd,path,mfinf[sel]);  
@@ -371,8 +375,8 @@ int display_directory(char* path,char** ndirptr){
           }
           break;
          case 'p':
-          char* tmp=str_append(path,"/");
-          char* loc=str_append(tmp,mfinf[sel]->name);
+          tmp=str_append(path,"/");
+          loc=str_append(tmp,mfinf[sel]->name);
           free(tmp);
 
           show_popup(loc,tw>>1,th>>1);
@@ -384,7 +388,7 @@ int display_directory(char* path,char** ndirptr){
           goto futsu_deguchi;
           break;
          case '/':
-          char* npath=input_dialogue("edit path",path,tw/3,th>>1,tw/3);
+          npath=input_dialogue("edit path",path,tw/3,th>>1,tw/3);
           if(npath!=NULL){
             if(dir_exists(npath)!=-1){
               path_normalize(npath);
@@ -402,10 +406,10 @@ int display_directory(char* path,char** ndirptr){
           break;
          case 'b':
           free(file_buffer);
-          char* tmp2=str_append(path,"/");
-          char* loc2=str_append(tmp2,mfinf[sel]->name);
-          free(tmp2);
-          file_buffer=loc2;
+          tmp=str_append(path,"/");
+          loc=str_append(tmp,mfinf[sel]->name);
+          free(tmp);
+          file_buffer=loc;
           break;
         case 'c':
           if(file_buffer!=NULL){

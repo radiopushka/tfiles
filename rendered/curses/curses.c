@@ -18,10 +18,10 @@ void refresh(){
 }
 
 void nocurs(){
-  printf("\e[?25l");
+  printf("\x1b[?25l");
 }
 void curs(){
-  printf("\e[?25h");
+  printf("\x1b[?25h");
 }
 void fpixel(unsigned char r,unsigned char g,unsigned char b){
   printf("\x1b[48;2;%d;%d;%dm ",r,g,b);

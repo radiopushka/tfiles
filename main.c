@@ -173,6 +173,7 @@ int display_directory(char* path,char** ndirptr){
     if(dh->ff!=dd_ptr){
         *ptr_itter=dh->ff;
         ptr_itter++;
+        count++;
     }
     struct dir_holder* tsugi=dh->next;
     free(dh);
@@ -180,9 +181,11 @@ int display_directory(char* path,char** ndirptr){
   }
  
   if(dd_ptr!=NULL){
+    sort_file_structure(1,count-1,mfinf);
     *mfinf=dd_ptr;
+  }else{
+    sort_file_structure(0,count,mfinf);
   }
-  sort_file_structure(0,count,mfinf);
   
   free(dh);
   dh=NULL;

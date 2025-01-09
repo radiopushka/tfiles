@@ -134,7 +134,7 @@ int display_directory(char* path,char** ndirptr){
   int count=0;
   struct FileInfo* dd_ptr=NULL;
   while((dinf=readdir(d))!=NULL){
-    if(strcmp(dinf->d_name,".")!=0 && !(strcmp(dinf->d_name,"..")==0&&strcmp(path,"/")==0)){
+    if(strcmp(".",dinf->d_name)!=0 && !(strcmp("..",dinf->d_name)==0&&strcmp("/",path)==0)){
       struct dir_holder* dhi=malloc(sizeof(struct dir_holder));
       dhi->next=dh;
       dh=dhi;
@@ -144,7 +144,7 @@ int display_directory(char* path,char** ndirptr){
         isdir=1;
       }
       init_file(&finf,dinf->d_name,isdir,path);
-      if(strcmp(dinf->d_name,"..")==0){
+      if(strcmp("..",dinf->d_name)==0){
         dd_ptr=finf;
       }
 
@@ -261,7 +261,7 @@ int display_directory(char* path,char** ndirptr){
     } else if(c==ENTER){
       char* exec_cmd;
       if(mfinf[sel]->is_dir==1){
-        if(strcmp(mfinf[sel]->name,"..")!=0){
+        if(strcmp("..",mfinf[sel]->name)!=0){
            char* tmp=str_append(path,"/");
           *ndirptr=str_append(tmp,mfinf[sel]->name);
           free(tmp);

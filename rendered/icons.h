@@ -129,7 +129,6 @@ void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
 
 
 
-    int rowc=0;
       
 
     const int size=(B_WIDTH)-2;
@@ -153,7 +152,6 @@ void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
       trk++;
       if(trk>csize){
         y++;
-        rowc++;
         trk=0;
         print_pad(1,border);
         mvmove(x,y);

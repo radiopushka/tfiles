@@ -541,6 +541,10 @@ int main(int argn,char* argv[]){
   if(argn>1){
     inipath=argv[1];
     path_normalize(inipath);
+    if(dir_exists(inipath)==-1){
+      printf("cannot open %s\n",inipath);
+      return 0;
+    }
   }
   if(inipath==NULL){
     inipath=slash;

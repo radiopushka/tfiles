@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17
+*/
 #include<stdlib.h>
 #include<string.h>
 

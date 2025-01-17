@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17th
+ * */
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>

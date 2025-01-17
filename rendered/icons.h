@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17th
+ * */
 #include "curses/curses.c"
 #include "image/fullscaled.c"
 
@@ -79,9 +82,14 @@ char* m_cmd[]={
 
 
 
+
 unsigned char BR=255;
 unsigned char BG=255;
 unsigned char BB=255;
+
+unsigned char BRs=102;
+unsigned char BGs=255;
+unsigned char BBs=102;
 
 void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
   BR=R;
@@ -99,13 +107,23 @@ void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
 
   }
 
-  void print_pad(int size,int inverse){
-      if(inverse==0){
+void set_colors(int inverse){
+     if(inverse==0){
         fbg(~BR,~BG,~BB);
+        ffg(BR,BG,BB);
+      }else if(inverse>1){
+        fbg(BRs,BGs,BBs);
+        ffg(~BRs,~BGs,BBs);
       }else{
         fbg(BR,BG,BB);
+        ffg(~BR,~BG,~BB);
       }
 
+}
+
+  void print_pad(int size,int inverse){
+     
+      set_colors(inverse);
       print_pad_n(size);
       fclear();
 
@@ -141,11 +159,7 @@ void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
       if(*i != -1){
        fbg(*i,*(i+1),*(i+2));
       }else{
-        if(border>0){
-          fbg(BR,BG,BB);
-        }else{
-          fbg(~BR,~BG,~BB);
-        }
+        set_colors(border);
       }
       fputc(' ',stdout);
 
@@ -185,15 +199,8 @@ void icon_set_border(unsigned char R,unsigned char G, unsigned char B){
       }
       fclear();
       mvmove(x,y);
-      if(border>0){
-        ffg(~BR,~BG,~BB);
-        fbg(BR,BG,BB);
-      }else{
-        fbg(~BR,~BG,~BB);
-        ffg(BR,BG,BB);
-
-      }
-
+    
+      set_colors(border);
       int xshift=1;
 
       print_pad_n(B_WIDTH);

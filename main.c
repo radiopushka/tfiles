@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17
+*/
 #include "rendered/rendered.h"
 #include <dirent.h>
 #include <sys/types.h>
@@ -8,13 +11,18 @@
 #include <locale.h>
 #include "rendered/KEYS.h"
 #include "command_processor.c"
+#include "vector/vector.h"
+#include "DEFAULTS.h"
 
 #define VOFFSET 2
 
 char* prev_cmd=NULL;
 char* prev_cmd2=NULL;
+char* prev_cmd3=NULL;
 char* prev_sagasu=NULL;
 char* file_buffer=NULL;
+
+Vector selection;
 
 
 struct dir_holder{
@@ -22,14 +30,63 @@ struct dir_holder{
   struct dir_holder* next;
 };
 
+int reccursive_return=0;
+//recursive command execution for each selected element
+void padded_terminal_cmd_helper(char* cmdin,int index,int tw,int th){
+  if(index>=get_vec_size(selection)){
+    return;
+  }
+
+                
+          int cmdlen2=strlen(cmdin);
+          char cbuff[cmdlen2+1];
+          memcpy(cbuff,cmdin,sizeof(char)*(cmdlen2+1));
+
+          char* cmd=get_ps(cbuff,element_at(selection,index),'q');
+
+          int cmdlen=strlen(cmd);
+          //cd \"$CDDIR\";
+          int extlen=12;
+          char ncmd[cmdlen+extlen+1];
+          memcpy(ncmd,"cd \"$CDDIR\";",sizeof(char)*extlen);
+          memcpy(ncmd+extlen,cmd,sizeof(char)*(cmdlen+1));
+          free(cmd);
+
+          int retval=system(ncmd);
+          //still notify the user if somthing is up
+          if(retval!=0){
+            reccursive_return=retval;
+          }
+
+  //--
+        padded_terminal_cmd_helper(cmdin,index+1,tw,th); 
+}
 //clean up UI so that the program runs smoothly
 void padded_terminal_cmd(char* cmd,int tw,int th){
+        
           fclear();
           clear();
           fflush(stdout);
           free_terminal();
 
+          if(get_vec_size(selection)!=0){
+            reccursive_return=0;
+            padded_terminal_cmd_helper(cmd,0,tw,th);
+            init_inputs();
+            
+            if(reccursive_return!=0 && strstr(cmd,"%q")!=NULL){
+              char error_msg[44];
+              sprintf(error_msg,"processes exited with code %d",reccursive_return);
+              show_popup(error_msg,tw>>1,th>>1);
+              fflush(stdout);
+              wgetch();
+
+            }
+      
+            return;
+          }
           
+        
           //get pwd to point to the correct directory
           int cmdlen=strlen(cmd);
           //cd \"$CDDIR\";
@@ -41,7 +98,7 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
           int retval=system(ncmd);
           init_inputs();
 
-          if(retval <0 || retval >1){
+          if(retval!=0){
             char error_msg[44];
             sprintf(error_msg,"child process exited with code %d",retval);
             show_popup(error_msg,tw>>1,th>>1);
@@ -66,6 +123,16 @@ int dir_exists(char* path){
 
   closedir(d);
   return 1;
+}
+
+int selection_contains(char* file){
+  unsigned int numsel=get_vec_size(selection);
+  for(unsigned int i=0;i<numsel;i++){
+    if(strcmp(file,element_at(selection,i))==0){
+      return 1;
+    }
+  }
+  return -1;
 }
 
 void pre_process_cmd_data(char** cmd,char* path, struct FileInfo* ff){
@@ -317,11 +384,11 @@ int display_directory(char* path,char** ndirptr){
           
 
       }else{
-        char* cmd=input_dialogue("open cmd(%f,%d,%b)",prev_cmd,tw/3,th>>1,tw/3);
+        char* cmd=input_dialogue("open cmd(%f,%d,%b,%q)",prev_cmd3,tw/3,th>>1,tw/3);
         
 
         if(cmd!=NULL){
-          str_cpy(cmd,&prev_cmd);
+          str_cpy(cmd,&prev_cmd3);
 
           pre_process_cmd_data(&cmd,path,mfinf[sel]);  
 
@@ -352,7 +419,7 @@ int display_directory(char* path,char** ndirptr){
         }
 
     }else if( c == ' '){
-      show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here",tw>>1,th>>1);
+      show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here\nv - queue file\nx - clear file queue\n\\ - view file queue",tw>>1,th>>1);
       fflush(stdout);
       int character=wgetch();
       char* cmd=NULL;
@@ -365,13 +432,14 @@ int display_directory(char* path,char** ndirptr){
           goto f_refresh;
           break;
         case 't':
-          cmd=input_dialogue("cmd(%d,%f,%b)",prev_cmd2,tw/3,th>>1,tw/3);
+          cmd=input_dialogue("cmd(%d,%f,%b,%q)",prev_cmd2,tw/3,th>>1,tw/3);
           if(cmd!=NULL){
               str_cpy(cmd,&prev_cmd2);
               pre_process_cmd_data(&cmd,path,mfinf[sel]);  
 
               padded_terminal_cmd(cmd,tw,th);
               free(cmd);
+              goto f_refresh;
           }
           break;
          case 'p':
@@ -401,7 +469,7 @@ int display_directory(char* path,char** ndirptr){
           }
           break;
          case 'd':
-          confirm_enter("rm -rf --verbose \"%f\"",path,mfinf[sel],th,tw);
+          confirm_enter(RM_NORM,path,mfinf[sel],th,tw);
           goto f_refresh;
           break;
          case 'b':
@@ -412,16 +480,47 @@ int display_directory(char* path,char** ndirptr){
           file_buffer=loc;
           break;
         case 'c':
-          if(file_buffer!=NULL){
-            confirm_enter("cp -r --verbose \"%b\" \"%d\"",path,mfinf[sel],th,tw);
+          if(get_vec_size(selection)!=0){
+
+            confirm_enter(CP_QUEUE,path,mfinf[sel],th,tw);
+            goto f_refresh;
+          }else if(file_buffer!=NULL){
+            confirm_enter(CP_NORM,path,mfinf[sel],th,tw);
             goto f_refresh;
           }
           break;
         case 'm':
-          if(file_buffer!=NULL){
-            confirm_enter("mv --verbose \"%b\" \"%d\"",path,mfinf[sel],th,tw);
+          if(get_vec_size(selection)!=0){
+
+            confirm_enter(MV_QUEUE,path,mfinf[sel],th,tw);
+            goto f_refresh;
+          }else if(file_buffer!=NULL){
+            confirm_enter(MV_NORM,path,mfinf[sel],th,tw);
             goto f_refresh;
 
+          }
+          break;
+        case 'v':
+            tmp=str_append(path,"/");
+            loc=str_append(tmp,mfinf[sel]->name);
+            free(tmp);
+
+            if(selection_contains(loc)==-1){
+              add_element(selection,loc,strlen(loc)+1);
+            }
+            free(loc);
+            break;
+        case 'x':
+          free_vector(selection);
+          selection=create_vector();
+          break;
+        case '\\':
+          if(get_vec_size(selection)!=0){
+            char* vec=vector_as_string(selection);
+            show_large_popup(vec,tw>>1,th>>1);
+            free(vec);
+            refresh();
+            wgetch();
           }
           break;
 
@@ -470,8 +569,18 @@ int display_directory(char* path,char** ndirptr){
         if(cp<tsize){
           load_file(mfinf[cp],path);
           int p=0;
+          if(get_vec_size(selection)!=0){
+              char* tmp=str_append(path,"/");
+              char* loc=str_append(tmp,mfinf[cp]->name);
+              free(tmp);
+
+              if(selection_contains(loc)==1){
+                p=1;
+              }
+              free(loc);
+          }
           if(cp==sel){
-            p=1;
+            p++;
           }
           display_file(mfinf[cp],x,y+VOFFSET,p);
           cp++;
@@ -549,6 +658,7 @@ int main(int argn,char* argv[]){
   if(inipath==NULL){
     inipath=slash;
   }
+  selection=create_vector();
 
   char* dpath=malloc(sizeof(char)*(strlen(inipath)+1));
   memcpy(dpath,inipath,sizeof(char)*(1+strlen(inipath)));
@@ -581,12 +691,14 @@ int main(int argn,char* argv[]){
   
   free(prev_cmd);
   free(prev_cmd2);
+  free(prev_cmd3);
   free(prev_sagasu);
   free(file_buffer);
   free(dpath);
   clear();
   curs();
-
+  
+  free_vector(selection);
   
   return 0;
 }

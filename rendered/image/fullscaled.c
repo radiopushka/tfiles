@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17th
+ * */
 #include "pngicon.c"
 
 int draw_full_image(char* file){

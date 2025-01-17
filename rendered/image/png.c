@@ -1,4 +1,6 @@
-
+/*
+ *author: Evan Nikitin 2025 Jan17th
+ * */
 #include "jpg.c"
 #include <png.h>
 #include<string.h>

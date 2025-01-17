@@ -1,3 +1,6 @@
+/*
+ *author: Evan Nikitin 2025 Jan17th
+ * */
 #include <jpeglib.h>
 #include <jerror.h>
 #include<string.h>

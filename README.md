@@ -56,6 +56,9 @@ It should work over SSH.
 - "%b" signifies the buffer variable (for copy and pasting), double quotes are recommended
 - "%f" signifies the highlighted file, double quotes are recommended
 - "%d" signifies the current directory, double quotes are recommended
+- "%q" signifies an element in the queue, double quotes are recommended
+- - for each element in the queue it will run the command manipulating "%q"
+
 
 ## Code Structure
 - **main.c:** The main entry point and core logic

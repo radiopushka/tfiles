@@ -57,7 +57,7 @@ It should work over SSH.
 - "%f" signifies the highlighted file, double quotes are recommended
 - "%d" signifies the current directory, double quotes are recommended
 - "%q" signifies an element in the queue, double quotes are recommended
-- - for each element in the queue it will run the command manipulating "%q"
+  - for each element in the queue it will run the command manipulating "%q"
 
 
 ## Code Structure
@@ -65,7 +65,7 @@ It should work over SSH.
 - **command_processor.c:** Handles parsing and processing of terminal commands
 - **rendered/**: UI rendering and key definitions
 - **rendered/icons.h**: this is where the default applications are defined as well as the 16x7 icons
-- - the icon color in the default set is #1c80bf with a white to alpha gradient
+  - the icon color in the default set is #1c80bf with a white to alpha gradient
 
 ## Contributing
 Feel free to fork and submit pull requests. Contributions for performance improvements and feature additions are welcome.

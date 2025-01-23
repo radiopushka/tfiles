@@ -36,7 +36,7 @@ int draw_full_image(char* file){
 
   
   if(aw==width && ah==height){
-    unsigned int y=1;
+    unsigned int y=2;
     mvmove(1,1);
     unsigned int rowcount=0;
     for(unsigned char* hajii=matrix; hajii<matrix_end;hajii=hajii+bytes){
@@ -64,7 +64,7 @@ int draw_full_image(char* file){
   
 
         unsigned char* sptr=matrix+y*(wmult1)+x*bytes;
-        mvmove(x+1,y+1);
+        mvmove(x+1,y+2);
         fpixel(*sptr,*(sptr+1),*(sptr+2));
 
       }
@@ -109,8 +109,8 @@ int draw_full_image(char* file){
     brightener(output_matrix,aw*ah*3);
     
     xs=0;
-    ys=1;
-    mvmove(1,1);
+    ys=2;
+    mvmove(1,ys);
     for(int* trace=output_matrix;trace<met;trace=trace+3){
 
     

@@ -25,6 +25,9 @@ size_t size_at(Vector vec, int index);
 unsigned int get_vec_size(Vector vec);
 void free_vector(Vector vec);
 
+//be carefull with this one I hope it works well
+void delete_element(Vector vec, int index);
+
 char* vector_as_string(Vector vec);
 
 #endif // !VECTOR

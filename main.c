@@ -69,12 +69,12 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
           fflush(stdout);
           free_terminal();
 
-          if(get_vec_size(selection)!=0){
+          if(get_vec_size(selection)!=0 && strstr(cmd,"%q")!=NULL){
             reccursive_return=0;
             padded_terminal_cmd_helper(cmd,0,tw,th);
             init_inputs();
             
-            if(reccursive_return!=0 && strstr(cmd,"%q")!=NULL){
+            if(reccursive_return!=0){
               char error_msg[44];
               sprintf(error_msg,"processes exited with code %d",reccursive_return);
               show_popup(error_msg,tw>>1,th>>1);
@@ -129,7 +129,7 @@ int selection_contains(char* file){
   unsigned int numsel=get_vec_size(selection);
   for(unsigned int i=0;i<numsel;i++){
     if(strcmp(file,element_at(selection,i))==0){
-      return 1;
+      return i;
     }
   }
   return -1;
@@ -505,8 +505,11 @@ int display_directory(char* path,char** ndirptr){
             loc=str_append(tmp,mfinf[sel]->name);
             free(tmp);
 
-            if(selection_contains(loc)==-1){
+            int loc_sel;
+            if((loc_sel=selection_contains(loc))==-1){
               add_element(selection,loc,strlen(loc)+1);
+            }else{
+              delete_element(selection,loc_sel);
             }
             free(loc);
             break;
@@ -574,7 +577,7 @@ int display_directory(char* path,char** ndirptr){
               char* loc=str_append(tmp,mfinf[cp]->name);
               free(tmp);
 
-              if(selection_contains(loc)==1){
+              if(selection_contains(loc)!=-1){
                 p=1;
               }
               free(loc);

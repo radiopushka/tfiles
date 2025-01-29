@@ -5,6 +5,8 @@
 #include "rendered.h"
 #include <sys/stat.h>
 #include <ctype.h>
+#include "KEYS.h"
+#include <dirent.h>
 
 
 
@@ -82,26 +84,52 @@ void load_file(struct FileInfo* ff,char* dirpath){
   char* fpf=str_append(fp,ff->name);
   free(fp);
 
-  if(ff->is_dir==1){
-    memcpy(ff->icon,IFOLDER,sizeof(int)*ICONSIZE);
-  }else if(get_image_icon(fpf,ff->icon) != -1){
-  ff->is_image=1;
-  
-  }else{
-    char** ending_m=ics_endings;
+  char linkread[4098];
 
-    int counter=0;
-    while(**ending_m!='.'){
-      if(strcmp(*ending_m,ff->extension)==0){
-        memcpy(ff->icon,ics_iconptr[counter],sizeof(int)*ICONSIZE);
-        ff->loaded=1;
-        free(fpf);
-        return;
+  if(ff->is_dir==DIR_T){
+    memcpy(ff->icon,IFOLDER,sizeof(int)*ICONSIZE);
+  }else if( ff->is_dir == FILE_T ){
+    if(get_image_icon(fpf,ff->icon) != -1){
+      ff->is_image=1;
+    }else{
+  
+      char** ending_m=ics_endings;
+
+      int counter=0;
+      while(**ending_m!='.'){
+        if(strcmp(*ending_m,ff->extension)==0){
+          memcpy(ff->icon,ics_iconptr[counter],sizeof(int)*ICONSIZE);
+          ff->loaded=1;
+          free(fpf);
+          return;
+        }
+        ending_m++;
+        counter++;
       }
-      ending_m++;
-      counter++;
+      memcpy(ff->icon,IFILE,sizeof(int)*ICONSIZE);
     }
-    memcpy(ff->icon,IFILE,sizeof(int)*ICONSIZE);
+  }else if( ff->is_dir == LINK_T ){
+
+      
+      ssize_t linkread_s=readlink(fpf,linkread,sizeof(linkread));
+
+      if(linkread_s != -1 && ff->link == NULL){
+        ff->link=malloc(linkread_s+(sizeof(char)));
+        memcpy(ff->link,linkread,linkread_s);
+        *(ff->link + linkread_s)=0;
+      }
+
+      DIR* tmp;
+      if((tmp=opendir(fpf))!=NULL){
+        closedir(tmp);
+        ff->is_dir=DIR_T;
+      }else{
+        ff->is_dir=FILE_T;
+      }
+      memcpy(ff->icon,LINK,sizeof(int)*ICONSIZE);
+  }else{
+
+      memcpy(ff->icon,WAKARANAI,sizeof(int)*ICONSIZE);
   }
   ff->loaded=1;
   free(fpf);
@@ -166,6 +194,7 @@ void init_file(struct FileInfo** ff,char* name,int is_dir,char* path){
   (*ff)->is_dir=is_dir;
   (*ff)->loaded=-1;
   (*ff)->is_image=-1;
+  (*ff)->link=NULL;
 
   if(statusst!=-1){
     (*ff)->mtime=dtm.st_mtime;
@@ -190,6 +219,7 @@ void free_file(struct FileInfo** ff){
   free((*ff)->extension);
   free((*ff)->display);
   free((*ff)->name);
+  free((*ff)->link);
   free(*ff);
   *ff=NULL;
 }

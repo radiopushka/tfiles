@@ -206,11 +206,7 @@ int display_directory(char* path,char** ndirptr){
       dhi->next=dh;
       dh=dhi;
       struct FileInfo* finf;
-      int isdir=-1;
-      if(dinf->d_type==4){
-        isdir=1;
-      }
-      init_file(&finf,dinf->d_name,isdir,path);
+      init_file(&finf,dinf->d_name,dinf->d_type,path);
       if(strcmp("..",dinf->d_name)==0){
         dd_ptr=finf;
       }
@@ -336,7 +332,7 @@ int display_directory(char* path,char** ndirptr){
       free(imloc);
     } else if(c==ENTER){
       char* exec_cmd;
-      if(mfinf[sel]->is_dir==1){
+      if(mfinf[sel]->is_dir==DIR_T){
         if(strcmp("..",mfinf[sel]->name)!=0){
            char* tmp=str_append(path,"/");
           *ndirptr=str_append(tmp,mfinf[sel]->name);
@@ -555,8 +551,18 @@ int display_directory(char* path,char** ndirptr){
     mvmove(0,2);
     ffg(95,95,255);
     fbg(200,200,200);
-    printf("%s",mfinf[sel]->name);
-    int printsize=strlen(mfinf[sel]->name);
+
+    struct FileInfo* selected = mfinf[sel];
+    int printsize;
+    if(selected->link == NULL){
+      printf("%s",selected->name);
+      printsize=strlen(selected->name);
+    }else{
+      printf("%s",selected->link);
+      printsize=strlen(selected->link);
+
+    }
+
     for(int i=printsize;i<(tw<<1);i++){
       fputc(' ',stdout);
     }

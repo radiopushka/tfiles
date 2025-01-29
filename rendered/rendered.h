@@ -13,6 +13,7 @@
     int icon[ICONSIZE];
     char* display;
     char* extension;
+    char* link;
     char* name;
     int loaded;
     int is_dir;

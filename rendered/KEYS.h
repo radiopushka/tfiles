@@ -16,3 +16,7 @@
 
 #define PG_UP 2117425947
 #define PG_DN 2117491483
+
+#define DIR_T 4
+#define LINK_T 10
+#define FILE_T 8

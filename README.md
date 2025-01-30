@@ -17,6 +17,7 @@ It should work over SSH.
 - GCC or compatible C compiler
 - libpng library
 - libjpeg library
+  - you can disable image support by following the instructions in the IMAGE_SUPPORT header file. They are enabled by default.
 - POSIX-compliant system
 - 256 color terminal like st
 

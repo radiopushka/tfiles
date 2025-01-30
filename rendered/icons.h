@@ -2,7 +2,15 @@
  *author: Evan Nikitin 2025 Jan17th
  * */
 #include "curses/curses.c"
-#include "image/fullscaled.c"
+#include "../IMAGE_SUPPORT.h"
+
+
+#ifndef NO_IMAGE_SUPPORT
+  #include "image/fullscaled.c"
+#endif // !NO_IMAGE_SUPPORT
+#ifdef NO_IMAGE_SUPPORT
+  #include "image/ICONSIZE.h"
+#endif // DEBUG
 
 #ifndef ICONS
 #define ICONS
@@ -231,11 +239,14 @@ void set_colors(int inverse){
 
 //demo
 void file_icon(int x, int y, char* file){
+#ifndef NO_IMAGE_SUPPORT
    if(get_image_icon(file,EMPTY) != -1){
       print_icon(x,y,EMPTY,0,NULL);
-   }else{
-     print_icon(x,y,IFILE,0,NULL);
+      return;
    }
+
+#endif // !NO_IMAGE_SUPPORT
+  print_icon(x,y,IFILE,0,NULL);
 }
 
 

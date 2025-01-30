@@ -13,6 +13,7 @@
 #include "command_processor.c"
 #include "vector/vector.h"
 #include "DEFAULTS.h"
+#include "./IMAGE_SUPPORT.h"
 
 #define VOFFSET 2
 
@@ -325,7 +326,13 @@ int display_directory(char* path,char** ndirptr){
        char* imloc=str_append(tmp,mfinf[sel]->name);
        free(tmp);
 
-      int status=draw_full_image(imloc);
+      int status=-1;
+      
+      #ifndef NO_IMAGE_SUPPORT
+      
+        status=draw_full_image(imloc);
+      
+      #endif /* ifndef NO_IMAGE_SUPPORT */
       if(status!=-1)
         wgetch();
 

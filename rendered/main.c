@@ -76,6 +76,14 @@ char* get_default_cmd(struct FileInfo* ff){
   return NULL;
 }
 
+int image_icon_helper(char* path,int* icon){
+  #ifndef NO_IMAGE_SUPPORT
+  
+    return get_image_icon(path,icon);
+  #endif /* ifndef NO_IMAGE_SUPPORT */
+  return -1;
+}
+
 void load_file(struct FileInfo* ff,char* dirpath){
   if(ff->loaded==1)
     return;
@@ -89,7 +97,7 @@ void load_file(struct FileInfo* ff,char* dirpath){
   if(ff->is_dir==DIR_T){
     memcpy(ff->icon,IFOLDER,sizeof(int)*ICONSIZE);
   }else if( ff->is_dir == FILE_T ){
-    if(get_image_icon(fpf,ff->icon) != -1){
+    if(image_icon_helper(fpf,ff->icon) != -1){
       ff->is_image=1;
     }else{
   

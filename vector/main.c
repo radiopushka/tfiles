@@ -9,7 +9,7 @@
 #include<string.h>
 
 
-Vector create_vector(){
+Vector create_vector(void){
   Vector vec=malloc(sizeof(struct Vector));
   vec->data=NULL;
   vec->locations=NULL;

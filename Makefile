@@ -4,4 +4,9 @@ EXTRA=-Wstrict-prototypes
 all:
 	$(CC) main.c rendered/dialogue.c vector/main.c rendered/main.c $(ARCH) $(EXTRA) -O2 -pedantic -Wall $(LIBS) -o tfiles 
 
+clean:
+	rm ./tfiles
+
+install:
+	cp ./tfiles /usr/bin
 

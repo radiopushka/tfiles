@@ -76,8 +76,8 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
             init_inputs();
             
             if(reccursive_return!=0){
-              char error_msg[44];
-              sprintf(error_msg,"processes exited with code %d",reccursive_return);
+              char error_msg[50];
+              snprintf(error_msg,sizeof(error_msg)-sizeof(char),"processes exited with code %d",reccursive_return);
               show_popup(error_msg,tw>>1,th>>1);
               fflush(stdout);
               wgetch();
@@ -100,8 +100,8 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
           init_inputs();
 
           if(retval!=0){
-            char error_msg[44];
-            sprintf(error_msg,"child process exited with code %d",retval);
+            char error_msg[50];
+            snprintf(error_msg,sizeof(error_msg)-sizeof(char),"child process exited with code %d",retval);
             show_popup(error_msg,tw>>1,th>>1);
             fflush(stdout);
             wgetch();

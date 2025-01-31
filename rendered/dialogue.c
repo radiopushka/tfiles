@@ -45,6 +45,8 @@ void dialogue_delete_char(char** mainbuff,char input,int index){
 char* input_dialogue(char* title,char* precursor,int x,int y, int width){
   int insert_index=0;
 
+  char* title_cp=NULL;
+
   char clrstring[width+4];
   memset(clrstring,' ',sizeof(char)*(width+3));
   clrstring[width+3]=0;
@@ -68,8 +70,13 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
   }
 
   if(title!=NULL){
-    if(strlen(title)>width){
-      title[width]=0;
+    int len;
+    int buffer=3;
+    if((len=strlen(title)) > (width+buffer)){
+      title_cp=malloc(sizeof(char)*(width+1+buffer));
+      memcpy(title_cp,title,sizeof(char)*(width+buffer));
+      title_cp[width+buffer]=0;
+      title=title_cp;
     }
   }
 
@@ -147,6 +154,7 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
 
     if(c==K_ESC){
       free(inist);
+      free(title_cp);
       return NULL;
     }
 
@@ -203,6 +211,7 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
 
   
 
+  free(title_cp);
   return inist;
 
 }

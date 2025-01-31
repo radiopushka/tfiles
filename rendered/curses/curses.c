@@ -13,17 +13,17 @@ void mvprint(int x,int y,char* string){
 void mvmove(int x,int y){
   printf("\033[%d;%dH",y,x);
 }
-void clear(){
+void clear(void){
   printf("\033c");
 }
-void refresh(){
+void refresh(void){
   fflush(stdout);
 }
 
-void nocurs(){
+void nocurs(void){
   printf("\x1b[?25l");
 }
-void curs(){
+void curs(void){
   printf("\x1b[?25h");
 }
 void fpixel(unsigned char r,unsigned char g,unsigned char b){
@@ -35,15 +35,15 @@ void fbg(unsigned char r,unsigned char g,unsigned char b){
 void ffg(unsigned char r,unsigned char g,unsigned char b){
   printf("\x1b[38;2;%d;%d;%dm",r,g,b);
 }
-void cblink(){
+void cblink(void){
   printf("\x1b[5m");
 }
 
-void fclear(){
+void fclear(void){
   printf("\x1b[0m");
 }
 
-void deguchi_nara(){
+void deguchi_nara(void){
   fclear();
   curs();
   clear();
@@ -52,11 +52,11 @@ void deguchi_nara(){
 }
 
 
-void init_inputs(){
+void init_inputs(void){
   set_terminal_mode();
   atexit(deguchi_nara);
 }
-void free_terminal(){
+void free_terminal(void){
   reset_terminal_mode();
 }
 
@@ -77,7 +77,7 @@ void term_size(int* width,int* height){
   *height=h;
 }
 
-int wgetch()
+int wgetch(void)
 {
   fflush(stdin);
 

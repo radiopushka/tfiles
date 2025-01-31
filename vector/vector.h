@@ -16,7 +16,7 @@ struct Vector{
 //--
 typedef struct Vector* Vector;
 
-Vector create_vector();
+Vector create_vector(void);
 
 
 void add_element(Vector vec,void* data,size_t size);

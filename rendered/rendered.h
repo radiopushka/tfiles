@@ -41,19 +41,19 @@ void str_lower(char* input);
 
 
 void mvmove(int x,int y);
-void clear();
-void refresh();
-void nocurs();
-void curs();
-void cblink();
+void clear(void);
+void refresh(void);
+void nocurs(void);
+void curs(void);
+void cblink(void);
 void fpixel(unsigned char r,unsigned char g,unsigned char b);
 void fbg(unsigned char r,unsigned char g,unsigned char b);
 void ffg(unsigned char r,unsigned char g,unsigned char b);
-void fclear();
+void fclear(void);
 void term_size(int* width,int* height);
-int wgetch();
-void init_inputs();
-void free_terminal();//allow other programs to use the current window
+int wgetch(void);
+void init_inputs(void);
+void free_terminal(void);//allow other programs to use the current window
 
 
 

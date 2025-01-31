@@ -10,12 +10,12 @@
 struct termios orig_term;
 struct termios new_term;
 
-void reset_terminal_mode()
+void reset_terminal_mode(void)
 {
     tcsetattr(0, TCSANOW, &orig_term);
 }
 
-void set_terminal_mode()
+void set_terminal_mode(void)
 {
 
     tcgetattr(0, &orig_term);
@@ -27,7 +27,7 @@ void set_terminal_mode()
 }
 
 
-int kbhit()
+int kbhit(void)
 {
     fd_set fds;
     FD_ZERO(&fds);
@@ -35,7 +35,7 @@ int kbhit()
     return select(1, &fds, NULL, NULL,NULL);
 }
 
-int kbhit_nb()
+int kbhit_nb(void)
 {
     struct timeval tv = { 0L, 0L };
     fd_set fds;

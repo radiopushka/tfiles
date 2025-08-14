@@ -1,0 +1,6 @@
+[my second section]
+compile=gcc ./thefile -o file
+test=gcc -o file
+[mysection]
+time=this time
+name=this=name

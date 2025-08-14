@@ -3,6 +3,7 @@
  * */
 #include "curses/curses.c"
 #include "../IMAGE_SUPPORT.h"
+#include "./config_file/config.h"
 
 
 #ifndef NO_IMAGE_SUPPORT
@@ -15,6 +16,9 @@
 #ifndef ICONS
 #define ICONS
 
+#define CFG_LOCATION "/.local/share/tfiles/mimetypes"
+#define CFG_LOCATION_ICS "/.local/share/tfiles/icons"
+#define CFG_DIR_CMD "mkdir ~/.local ; mkdir ~/.local/share ; mkdir ~/.local/share/tfiles"
 //default icon size: width:16, height:7 pixels
 //
   int DOC[]={33,129,191,52,133,193,65,137,194,75,140,196,82,143,197,88,145,198,92,147,198,96,149,199,94,148,199,92,147,198,86,144,197,80,142,196,70,138,195,62,136,194,48,132,192,28,128,191,45,131,192,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,33,129,191,48,132,192,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,105,153,201,109,155,202,108,154,202,103,152,200,96,149,199,89,145,198,-1,-1,-1,-1,-1,-1,-1,-1,-1,39,130,192,48,132,192,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,39,130,192,45,131,192,-1,-1,-1,72,139,195,82,143,197,90,146,198,97,149,199,105,153,201,107,154,201,106,153,201,101,151,200,96,149,199,89,145,198,78,141,196,68,138,195,-1,-1,-1,39,130,192,45,131,192,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,33,129,191,35,129,191,52,133,193,65,137,194,72,139,195,82,143,197,89,145,198,92,147,198,94,148,199,92,147,198,90,146,198,84,144,197,78,141,196,70,138,195,59,135,194,48,132,192,28,128,191,};
@@ -42,8 +46,11 @@
   int EMPTY[ICONSIZE];
 
 
+//icon map
+CfgRaster icon_map = NULL;
 
 //mimetype map
+CfgRaster mimetype_map = NULL;
 
 char* ics_endings[]={
   "wav","ogg","mp3",
@@ -65,7 +72,7 @@ int* ics_iconptr[ICONSIZE]={
 //end mimetype map
 //
 //default command mimetype
-char gazou[]="mpv \"%f\" --speed=0.01 --loop"; //picture
+/*char gazou[]="mpv \"%f\" --speed=0.01 --loop"; //picture
 char gif[]="mpv \"%f\" --loop"; //gif
 char douga[]="mpv \"%f\""; //video
 char oto[]="mpv \"%f\" --no-video"; //sound
@@ -91,9 +98,155 @@ char* m_cmd[]={
   doc,doc,doc,doc,doc,doc,
   edit,edit,edit,edit,edit,edit,edit,edit,edit,edit,edit,edit,edit
 };
+*/
+int CHANGE_FLAG = -1;
+void put_if_empty(CfgRaster* raster, char* section,char* key, char* value){
+  char* val = get_value_by(*raster,section,key);
+  if(val == NULL){
+    put_value_by(raster,section,key,value);
+    CHANGE_FLAG = 1;
+  }
+}
+void init_icons(void){
+  CHANGE_FLAG = -1;
+  char* home = getenv("HOME");
+  char file_spot[strlen(home)+strlen(CFG_LOCATION_ICS)+1];
+  sprintf(file_spot,"%s%s",home,CFG_LOCATION_ICS);
+  free_cfg_mem(icon_map);
+  icon_map = read_cfg_file(file_spot);
+  char* tmp;
+  put_if_empty(&icon_map,"icons","ics_unknown",tmp=array_to_string(WAKARANAI,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_doc",tmp=array_to_string(DOC,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_arch",tmp=array_to_string(ARCH,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_image",tmp=array_to_string(IMAGE,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_pdf",tmp=array_to_string(PDF,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_video",tmp=array_to_string(VIDEO,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_audio",tmp=array_to_string(AUDIO,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_folder",tmp=array_to_string(IFOLDER,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_file",tmp = array_to_string(IFILE,ICONSIZE));
+  free(tmp);
+  put_if_empty(&icon_map,"icons","ics_link",tmp =array_to_string(LINK,ICONSIZE));
+  free(tmp);
+  //map
+  put_if_empty(&icon_map,"mimetypes","unknown","ics_unknown");
+  put_if_empty(&icon_map,"mimetypes","folder","ics_folder");
+  put_if_empty(&icon_map,"mimetypes","file","ics_file");
+  put_if_empty(&icon_map,"mimetypes","link","ics_link");
+  //less crucial
+  put_if_empty(&icon_map,"mimetypes","image","ics_image");
+  put_if_empty(&icon_map,"mimetypes","audio","ics_audio");
+  put_if_empty(&icon_map,"mimetypes","video","ics_video");
+  put_if_empty(&icon_map,"mimetypes","pdf"  ,"ics_pdf");
+  put_if_empty(&icon_map,"mimetypes","video","ics_video");
+  put_if_empty(&icon_map,"mimetypes","arch" ,"ics_arch");
+  put_if_empty(&icon_map,"mimetypes","archz","ics_arch");
+  put_if_empty(&icon_map,"mimetypes","doc"  ,"ics_doc");
+  if(CHANGE_FLAG != -1){
+    write_cfg_file(icon_map,file_spot);
+  }
 
+}
+void init_type_config(void){
+  CHANGE_FLAG = -1;
+  char* home = getenv("HOME");
+  char file_spot[strlen(home)+strlen(CFG_LOCATION)+1];
+  sprintf(file_spot,"%s%s",home,CFG_LOCATION);
+  free_cfg_mem(mimetype_map);
+  mimetype_map = read_cfg_file(file_spot);
 
+  //load default configuration: mimetypes
+  put_if_empty(&mimetype_map,"mimetypes","jpg","image");
+  put_if_empty(&mimetype_map,"mimetypes","jpeg","image");
+  put_if_empty(&mimetype_map,"mimetypes","png","image");
+  put_if_empty(&mimetype_map,"mimetypes","svg","image");
+  put_if_empty(&mimetype_map,"mimetypes","webp","image");
 
+  put_if_empty(&mimetype_map,"mimetypes","gif","gif");
+
+  put_if_empty(&mimetype_map,"mimetypes","mp4","video");
+  put_if_empty(&mimetype_map,"mimetypes","mov","video");
+  put_if_empty(&mimetype_map,"mimetypes","mkv","video");
+  put_if_empty(&mimetype_map,"mimetypes","av","video");
+  put_if_empty(&mimetype_map,"mimetypes","avi","video");
+  put_if_empty(&mimetype_map,"mimetypes","webm","video");
+
+  put_if_empty(&mimetype_map,"mimetypes","mp3","audio");
+  put_if_empty(&mimetype_map,"mimetypes","wav","audio");
+  put_if_empty(&mimetype_map,"mimetypes","ogg","audio");
+
+  put_if_empty(&mimetype_map,"mimetypes","pdf","pdf");
+
+  put_if_empty(&mimetype_map,"mimetypes","tar","arch");
+  put_if_empty(&mimetype_map,"mimetypes","zip","archz");
+  put_if_empty(&mimetype_map,"mimetypes","gunzip","archz");
+  put_if_empty(&mimetype_map,"mimetypes","gzip","archz");
+  put_if_empty(&mimetype_map,"mimetypes","gz","arch");
+  put_if_empty(&mimetype_map,"mimetypes","xz","arch");
+  put_if_empty(&mimetype_map,"mimetypes","zs","arch");
+
+  put_if_empty(&mimetype_map,"mimetypes","odt","doc");
+  put_if_empty(&mimetype_map,"mimetypes","docx","doc");
+  put_if_empty(&mimetype_map,"mimetypes","doc","doc");
+  put_if_empty(&mimetype_map,"mimetypes","pptx","doc");
+  put_if_empty(&mimetype_map,"mimetypes","ppt","doc");
+  put_if_empty(&mimetype_map,"mimetypes","csv","doc");
+
+  put_if_empty(&mimetype_map,"mimetypes","xml","text");
+  put_if_empty(&mimetype_map,"mimetypes","txt","text");
+  put_if_empty(&mimetype_map,"mimetypes","text","text");
+  put_if_empty(&mimetype_map,"mimetypes","c","text");
+  put_if_empty(&mimetype_map,"mimetypes","h","text");
+  put_if_empty(&mimetype_map,"mimetypes","sh","text");
+  put_if_empty(&mimetype_map,"mimetypes","cpp","text");
+  put_if_empty(&mimetype_map,"mimetypes","hpp","text");
+  put_if_empty(&mimetype_map,"mimetypes","php","text");
+  put_if_empty(&mimetype_map,"mimetypes","html","text");
+  put_if_empty(&mimetype_map,"mimetypes","java","text");
+  put_if_empty(&mimetype_map,"mimetypes","json","text");
+  put_if_empty(&mimetype_map,"mimetypes","config","text");
+  put_if_empty(&mimetype_map,"mimetypes","conf","text");
+  put_if_empty(&mimetype_map,"mimetypes","md","text");
+
+  put_if_empty(&mimetype_map,"mimetypes","makefile","text");
+  put_if_empty(&mimetype_map,"mimetypes","mimetypes","text");
+  put_if_empty(&mimetype_map,"mimetypes","icons","text");
+
+  //load default configuration: default command
+  put_if_empty(&mimetype_map,"default commands","image","mpv \"%f\" --speed=0.01 --loop");
+  put_if_empty(&mimetype_map,"default commands","gif","mpv \"%f\" --loop");
+  put_if_empty(&mimetype_map,"default commands","video","mpv \"%f\"");
+  put_if_empty(&mimetype_map,"default commands","audio","mpv \"%f\" --no-video");
+  put_if_empty(&mimetype_map,"default commands","pdf","xpdf \"%f\" &");
+  put_if_empty(&mimetype_map,"default commands","doc","libreoffice \"%f\" &");
+  put_if_empty(&mimetype_map,"default commands","text","nvim \"%f\"");
+
+  if(CHANGE_FLAG != -1){
+
+      system(CFG_DIR_CMD);
+      int res = write_cfg_file(mimetype_map,file_spot);
+      printf("wrote configuration file status: %d \n",res);
+  }
+
+  init_icons();
+
+}
+
+void free_configs(void){
+
+  free_cfg_mem(mimetype_map);
+  mimetype_map = NULL;
+  free_cfg_mem(icon_map);
+  icon_map = NULL;
+
+}
 
 unsigned char BR=255;
 unsigned char BG=255;

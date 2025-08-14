@@ -64,7 +64,13 @@ void str_lower(char* input){
 }
 
 char* get_default_cmd(struct FileInfo* ff){
-  char** ending=m_endings;
+  char* extension = ff -> extension;
+  char* type = get_value_by(mimetype_map, "mimetypes",extension);
+  if(type == NULL)
+    return NULL;
+
+  return get_value_by(mimetype_map,"default commands",type);
+  /*char** ending=m_endings;
   int count=0;
   while(**ending!='.'){
     if(strcmp(*ending,ff->extension)==0){
@@ -73,7 +79,7 @@ char* get_default_cmd(struct FileInfo* ff){
     ending++;
     count++;
   }
-  return NULL;
+  return NULL;*/
 }
 
 int image_icon_helper(char* path,int* icon){
@@ -82,6 +88,29 @@ int image_icon_helper(char* path,int* icon){
     return get_image_icon(path,icon);
   #endif /* ifndef NO_IMAGE_SUPPORT */
   return -1;
+}
+
+void prepare_small_icon(int* destination,char* type,int* def){
+  char* ident=get_value_by(icon_map,"mimetypes",type);
+  if(ident == NULL){
+     memcpy(destination,def,sizeof(int)*ICONSIZE);
+    return;
+
+  }
+
+  CfgRaster iconmap = get_raster_by(icon_map,"icons",ident);
+  if(iconmap == NULL){
+     memcpy(destination,def,sizeof(int)*ICONSIZE);
+    return;
+
+  }
+
+  int dummy_size;
+  if(iconmap -> extpt == NULL)
+    iconmap -> extpt = string_to_array( iconmap->value , &dummy_size);
+
+  memcpy(destination,iconmap -> extpt, sizeof(int)*ICONSIZE);
+
 }
 
 void load_file(struct FileInfo* ff,char* dirpath){
@@ -95,15 +124,24 @@ void load_file(struct FileInfo* ff,char* dirpath){
   char linkread[4098];
 
   if(ff->is_dir==DIR_T){
-    memcpy(ff->icon,IFOLDER,sizeof(int)*ICONSIZE);
+    prepare_small_icon(ff->icon,"folder",IFOLDER);
   }else if( ff->is_dir == FILE_T ){
     if(image_icon_helper(fpf,ff->icon) != -1){
       ff->is_image=1;
     }else{
   
+      char* type = get_value_by(mimetype_map, "mimetypes",ff->extension);
+      if(type == NULL){
+        prepare_small_icon(ff->icon,"unknown",WAKARANAI);
+
+      }else{
+        prepare_small_icon(ff->icon,type,WAKARANAI);
+      }
+/*
       char** ending_m=ics_endings;
 
       int counter=0;
+
       while(**ending_m!='.'){
         if(strcmp(*ending_m,ff->extension)==0){
           memcpy(ff->icon,ics_iconptr[counter],sizeof(int)*ICONSIZE);
@@ -115,6 +153,7 @@ void load_file(struct FileInfo* ff,char* dirpath){
         counter++;
       }
       memcpy(ff->icon,IFILE,sizeof(int)*ICONSIZE);
+      */
     }
   }else if( ff->is_dir == LINK_T ){
 
@@ -134,10 +173,12 @@ void load_file(struct FileInfo* ff,char* dirpath){
       }else{
         ff->is_dir=FILE_T;
       }
-      memcpy(ff->icon,LINK,sizeof(int)*ICONSIZE);
+      //memcpy(ff->icon,LINK,sizeof(int)*ICONSIZE);
+      prepare_small_icon(ff->icon,"link",LINK);
   }else{
+      prepare_small_icon(ff->icon,"unknown",WAKARANAI);
 
-      memcpy(ff->icon,WAKARANAI,sizeof(int)*ICONSIZE);
+      //memcpy(ff->icon,WAKARANAI,sizeof(int)*ICONSIZE);
   }
   ff->loaded=1;
   free(fpf);
@@ -175,8 +216,11 @@ void init_file(struct FileInfo** ff,char* name,int is_dir,char* path){
   size_t cpsize=sizeof(char)*(strlen(dname)+1);
   char* fname=malloc(cpsize);
   memcpy(fname,dname,cpsize);
-  char* ext=file_last_prefix(name,'.');
+  char* ext=file_last_prefix(dname,'.');
   process_file_name(dname,ext);
+  /*if(strcmp(ext,"")==0){
+    sprintf(ext,dname);
+  }*/
 
   str_lower(ext);
 

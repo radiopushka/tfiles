@@ -1,0 +1,7 @@
+[mysection]
+name=this=name
+time=this time
+
+[my second section]
+test=nvim "%f"
+

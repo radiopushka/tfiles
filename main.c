@@ -671,6 +671,7 @@ int main(int argn,char* argv[]){
       return 0;
     }
   }
+  init_type_config();
   if(inipath==NULL){
     inipath=slash;
   }
@@ -715,6 +716,7 @@ int main(int argn,char* argv[]){
   curs();
   
   free_vector(selection);
+  free_configs();
   
   return 0;
 }

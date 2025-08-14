@@ -61,5 +61,8 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width);
 void show_popup(char* text,int x,int y);
 void show_large_popup(char* text,int x, int y);
 
+void init_type_config(void);
+void free_configs(void);
+
 
 #endif // !RENDER

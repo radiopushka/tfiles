@@ -186,7 +186,7 @@ void confirm_enter(char* command,char* path,struct FileInfo* ff,int th,int tw){
 }
 
 
-int display_directory(char* path,char** ndirptr){
+int display_directory(char* path,char** ndirptr,int* presel){
   DIR* d= opendir(path);
 
   struct dirent* dinf;
@@ -276,6 +276,10 @@ int display_directory(char* path,char** ndirptr){
   }
   int sel=0;
 
+  if(*presel>0&&*presel<tsize){
+    sel=*presel;
+  }
+
   while(c!=K_ESC && c!=CTRLX){
 
    
@@ -300,23 +304,27 @@ int display_directory(char* path,char** ndirptr){
       if(sel>=tsize){
         sel=tsize-1;
       }
+    *presel=sel;
     }else if(c==ARROW_LEFT){
       sel--;
       if(sel<0){
         sel=0;
       }
+    *presel=sel;
     }else if(c==ARROW_UP){
       int selp=sel;
       sel=sel-xele;
       if(sel<0){
         sel=selp;
       }
+    *presel=sel;
     }else if(c==ARROW_DOWN){
       int selp=sel;
       sel=sel+xele;
       if(sel>=tsize){
         sel=selp;
       }
+    *presel=sel;
     }else if(c==TAB && mfinf[sel]->is_image==1){
       clear();
       nocurs();
@@ -404,8 +412,10 @@ int display_directory(char* path,char** ndirptr){
 
     }else if( c == PG_UP){
       sel=0;
+      *presel=sel;
     }else if( c == PG_DN){
       sel=tsize-1;
+      *presel=sel;
 
     }else if( c == '/'){
         char* cmd=input_dialogue("search",prev_sagasu,tw/3,th>>1,tw/3);
@@ -414,6 +424,7 @@ int display_directory(char* path,char** ndirptr){
           for(int i=sel+1;i<tsize;i++){
             if(strstr(mfinf[i]->name,cmd)!=NULL){
               sel=i;
+              *presel=sel;
               break;
             }
           }
@@ -421,7 +432,7 @@ int display_directory(char* path,char** ndirptr){
 
         }
 
-    }else if( c == ' '){
+    }else if( c == ' ' || c == ':'){
       show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here\nv - queue file\nx - clear file queue\n\\ - view file queue",tw>>1,th>>1);
       fflush(stdout);
       int character=wgetch();
@@ -537,6 +548,7 @@ int display_directory(char* path,char** ndirptr){
       for(int i=sel+1;i<tsize;i++){
         if(mfinf[i]->name[0]==c){
           sel=i;
+          *presel=sel;
           break;
         }
       }
@@ -686,6 +698,7 @@ int main(int argn,char* argv[]){
 
   int status=0;
   char* tpath;
+  int selected=0;
   while(status!=1){
     if(status==-1){
       free(dpath); 
@@ -693,16 +706,20 @@ int main(int argn,char* argv[]){
 
       memcpy(dpath,inipath,sizeof(char)*(1+strlen(inipath)));
     }
+    if(status!=10){
+      selected=0;
+    }
     if(status==2){
       int pl=strlen(tpath);
       free(dpath);
       dpath=malloc(sizeof(char)*(pl+1));
       memcpy(dpath,tpath,sizeof(char)*(pl+1));
       free(tpath);
-      status=display_directory(dpath,&tpath);
+
+      status=display_directory(dpath,&tpath,&selected);
     }else{
 
-      status=display_directory(dpath,&tpath);
+      status=display_directory(dpath,&tpath,&selected);
     }
   }
   

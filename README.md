@@ -9,6 +9,8 @@ It should work over SSH.
 - **Command Execution:** Run terminal commands on selected files and directories.
 - **Search Functionality:** Search for files within a directory using `/`.
 - **File Operations:**
+  - Default configurations for programs located in ~/.local/share/tfiles/mimetypes
+    - It follows a pattern of extension to type and then a type to command. 
   - Copy, move, and delete files and directories.
   - Set and paste file buffers for file transfers.
 - **Keyboard Driven:** Fully controlled using the keyboard for maximum efficiency.

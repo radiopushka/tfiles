@@ -3,6 +3,7 @@
  * */
 #include "icons.h"
 #include "rendered.h"
+#include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include "KEYS.h"
@@ -30,11 +31,11 @@ char* file_last_prefix(char* path,char ident){
     }
   }
 
- 
+
   memcpy(name,fslash,sizeof(char)*(end-fslash));
   name[255]=0;
   return name;
-  
+
 }
 
 void process_file_name(char* name,char* ext){
@@ -62,6 +63,24 @@ void str_lower(char* input){
       *tr=tolower(*tr);
   }
 }
+//max size: 1kB
+char* get_clipboard(){
+
+  char* clip = get_value_by(mimetype_map,"default commands","CLIPBOARD_CMD");
+  if(!clip)
+    return 0;
+
+  FILE* cmd = popen(clip,"r");
+  if(!cmd)
+    return 0;
+
+  char* output_string = malloc(sizeof(char)*1024);
+  memset(output_string, 0, 1024);
+  fgets(output_string,1024,cmd);
+  pclose(cmd);
+
+  return output_string;
+}
 
 char* get_default_cmd(struct FileInfo* ff){
   char* extension = ff -> extension;
@@ -84,7 +103,7 @@ char* get_default_cmd(struct FileInfo* ff){
 
 int image_icon_helper(char* path,int* icon){
   #ifndef NO_IMAGE_SUPPORT
-  
+
     return get_image_icon(path,icon);
   #endif /* ifndef NO_IMAGE_SUPPORT */
   return -1;
@@ -129,7 +148,7 @@ void load_file(struct FileInfo* ff,char* dirpath){
     if(image_icon_helper(fpf,ff->icon) != -1){
       ff->is_image=1;
     }else{
-  
+
       char* type = get_value_by(mimetype_map, "mimetypes",ff->extension);
       if(type == NULL){
         prepare_small_icon(ff->icon,"unknown",WAKARANAI);
@@ -157,7 +176,7 @@ void load_file(struct FileInfo* ff,char* dirpath){
     }
   }else if( ff->is_dir == LINK_T ){
 
-      
+
       ssize_t linkread_s=readlink(fpf,linkread,sizeof(linkread));
 
       if(linkread_s != -1 && ff->link == NULL){
@@ -187,7 +206,7 @@ void load_file(struct FileInfo* ff,char* dirpath){
 }
 
 void sort_file_structure(int start,int end,struct FileInfo* ff[]){
-  
+
   struct FileInfo** ptrstrt=ff+start;
   struct FileInfo** ptrend=ff+end;
 
@@ -291,7 +310,7 @@ int main(int argn,char* argv[]){
 
   printf("\n");
   free_file(&ff);
-   
+
   //draw_full_image(argv[1]);
 
   return 0;

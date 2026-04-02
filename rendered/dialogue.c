@@ -11,12 +11,12 @@
 //text input dialogue
 
 void dialogue_insert_char(char** mainbuff,char input,int index){
-      
+
       char* oldinput=*mainbuff;
 
       int oldlen=strlen(oldinput);
       int ata_len=oldlen+2;
-      
+
       char* atarashii=malloc(sizeof(char)*ata_len);
       memcpy(atarashii,oldinput,sizeof(char)*index);
       atarashii[index]=input;
@@ -27,12 +27,12 @@ void dialogue_insert_char(char** mainbuff,char input,int index){
 
 }
 void dialogue_delete_char(char** mainbuff,char input,int index){
-      
+
       char* oldinput=*mainbuff;
 
       int oldlen=strlen(oldinput);
       int ata_len=oldlen;
-      
+
       char* atarashii=malloc(sizeof(char)*ata_len);
       memcpy(atarashii,oldinput,sizeof(char)*(index-1));
       memcpy(atarashii+index-1,oldinput+index,sizeof(char)*(oldlen-index));
@@ -109,6 +109,7 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
     fputs(clrstring2,stdout);
     fbg(51,153,255);
     fputc(' ',stdout);
+    //printf("%d",c);
     fbg(230,230,230);
     ffg(0,0,0);
     mvmove(x+1,y+1);
@@ -147,9 +148,9 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
           fputc('|',stdout);
 
     }
-  
+
     refresh();
-  
+
     c=wgetch();
 
     if(c==K_ESC){
@@ -157,9 +158,28 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
       free(title_cp);
       return NULL;
     }
+    if(c == INS){
+        char* output=get_clipboard();
+        if(output){
+            output[1023]=0;
+            int len = strlen(output);
+            if(inist==NULL){
+                inist = malloc(sizeof(char)*(len+1));
+                memcpy(inist,output,len+1);
+                free(output);
+            }else{
+                for(int i = 0;i<len;i++){
+                    dialogue_insert_char(&inist,output[i],insert_index);
+                    insert_index++;
+                }
+                free(output);
+
+            }
+        }
+    }
 
     if((c>32 && c<127)||(c==' ')){
-     
+
       if(inist==NULL){
         inist=malloc(sizeof(char)*2);
         inist[0]=c;
@@ -169,13 +189,13 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
         dialogue_insert_char(&inist,c,insert_index);
         insert_index++;
       }
-      
+
     }else if(c==ARROW_LEFT){
       insert_index--;
       if(insert_index<0){
         insert_index=0;
       }
-      
+
     }else if(c==ARROW_RIGHT && inist!=NULL ){
       insert_index++;
       int str_len=strlen(inist);
@@ -199,9 +219,10 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
           dialogue_delete_char(&inist,c,insert_index);
           insert_index--;
         }
-       
+
       }
-     
+
+
     }
     offset=insert_index-width;
     if(offset<0)
@@ -209,7 +230,7 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
 
   }
 
-  
+
 
   free(title_cp);
   return inist;
@@ -221,7 +242,7 @@ char* input_dialogue(char* title,char* precursor,int x,int y, int width){
 void show_popup(char* text,int x, int y){
 
   if(text==NULL)
-    return; 
+    return;
 
   mvmove(x-(strlen(text)>>1)-1,y);
   ffg(0,0,0);
@@ -240,7 +261,7 @@ void show_popup(char* text,int x, int y){
 void show_large_popup(char* text,int x, int y){
 
   if(text==NULL)
-    return; 
+    return;
 
   //find the longest line in the string:
   int char_count=0;
@@ -270,7 +291,7 @@ void show_large_popup(char* text,int x, int y){
   fbg(51,153,255);
   fputs(filler,stdout);
   fbg(230,230,230);
-  
+
   y++;
   mvmove(x,y);
   fputs(filler,stdout);

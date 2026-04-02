@@ -12,7 +12,7 @@
 
 #define CTRLC 3
 #define CTRLX 24
-#define CTRLV 27
+#define INS 1748261659
 
 #define PG_UP 2117425947
 #define PG_DN 2117491483

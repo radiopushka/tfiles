@@ -51,7 +51,7 @@ void add_element(Vector vec,void* data,size_t size){
 
   free(vec->data);
   vec->data=nvec;
-  
+
 
 }
 
@@ -107,13 +107,13 @@ char* vector_as_string(Vector vec){
 void delete_element(Vector vec, int index){
 
   size_t sizev=size_at(vec,index);
-  printf("%lu\n",sizev);
+  //printf("%lu\n",sizev);
   size_t newmemsize=vec->mem-sizev;
-  
+
   char* start=vec->data;
   char* nvec = malloc(newmemsize);
   size_t pseudo=vec->locations[index];
-  
+
   memcpy(nvec,start,pseudo);
 
   size_t tail=newmemsize-pseudo;
@@ -121,7 +121,7 @@ void delete_element(Vector vec, int index){
   //now all the data has been inserted
   //
   size_t fsize=index*sizeof(size_t);
-  
+
   size_t new_loc_size=vec->locsize-sizeof(size_t);
   size_t fcpy=vec->locsize-sizeof(size_t)-fsize;
   size_t* newloc=malloc(new_loc_size);
@@ -140,7 +140,7 @@ void delete_element(Vector vec, int index){
   memcpy(nsizes,vec->sizes,fsize);
   memcpy(nsizes+index,vec->sizes+index+1,fcpy);
 
- 
+
   free(vec->sizes);
   vec->sizes=nsizes;
 
@@ -169,11 +169,11 @@ int main(){
   add_element(vec,str2,strlen(str2)+1);
   add_element(vec,str3,strlen(str3)+1);
 
-  
+
   printf("%s\n",(char*)element_at(vec,0));
   printf("%s\n",(char*)element_at(vec,1));
   printf("%s\n\n",(char*)element_at(vec,2));
-  
+
   delete_element(vec,2);
   printf("%s\n",(char*)element_at(vec,0));
   printf("%s\n\n",(char*)element_at(vec,1));

@@ -38,7 +38,7 @@ void padded_terminal_cmd_helper(char* cmdin,int index,int tw,int th){
     return;
   }
 
-                
+
           int cmdlen2=strlen(cmdin);
           char cbuff[cmdlen2+1];
           memcpy(cbuff,cmdin,sizeof(char)*(cmdlen2+1));
@@ -60,11 +60,11 @@ void padded_terminal_cmd_helper(char* cmdin,int index,int tw,int th){
           }
 
   //--
-        padded_terminal_cmd_helper(cmdin,index+1,tw,th); 
+        padded_terminal_cmd_helper(cmdin,index+1,tw,th);
 }
 //clean up UI so that the program runs smoothly
 void padded_terminal_cmd(char* cmd,int tw,int th){
-        
+
           fclear();
           clear();
           fflush(stdout);
@@ -74,7 +74,7 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
             reccursive_return=0;
             padded_terminal_cmd_helper(cmd,0,tw,th);
             init_inputs();
-            
+
             if(reccursive_return!=0){
               char error_msg[50];
               snprintf(error_msg,sizeof(error_msg)-sizeof(char),"processes exited with code %d",reccursive_return);
@@ -83,11 +83,11 @@ void padded_terminal_cmd(char* cmd,int tw,int th){
               wgetch();
 
             }
-      
+
             return;
           }
-          
-        
+
+
           //get pwd to point to the correct directory
           int cmdlen=strlen(cmd);
           //cd \"$CDDIR\";
@@ -155,13 +155,20 @@ void pre_process_cmd_data(char** cmd,char* path, struct FileInfo* ff){
             escaped2=get_ps(escaped,cp_no_appo,'b');
             free(cp_no_appo);
             free(escaped);
-            
+
           }
 
           char* escaped3=get_ps(escaped2,file_no_appo,'f');
           free(file_no_appo);
 
           free(escaped2);
+          char* clip = get_clipboard();
+          if(clip){
+            char* escaped4=get_ps(escaped3,clip,'c');
+            free(escaped3);
+            escaped3=escaped4;
+            free(clip);
+          }
 
           free(*cmd);
           *cmd=escaped3;
@@ -170,14 +177,14 @@ void pre_process_cmd_data(char** cmd,char* path, struct FileInfo* ff){
 
 void confirm_enter(char* command,char* path,struct FileInfo* ff,int th,int tw){
        char* cmd=input_dialogue("confirm?",command,tw/3,th>>1,tw/3);
-        
+
 
         if(cmd!=NULL){
           str_cpy(cmd,&prev_cmd);
 
-          pre_process_cmd_data(&cmd,path,ff);  
+          pre_process_cmd_data(&cmd,path,ff);
 
-         
+
           padded_terminal_cmd(cmd,tw,th);
 
           free(cmd);
@@ -242,7 +249,7 @@ int display_directory(char* path,char** ndirptr,int* presel){
   }
   if(dh!=NULL)
   while(dh!=NULL){
-    
+
     if(dh->ff!=dd_ptr){
         *ptr_itter=dh->ff;
         ptr_itter++;
@@ -252,37 +259,42 @@ int display_directory(char* path,char** ndirptr,int* presel){
     free(dh);
     dh=tsugi;
   }
- 
+
   if(dd_ptr!=NULL){
     sort_file_structure(1,count-1,mfinf);
     *mfinf=dd_ptr;
   }else{
     sort_file_structure(0,count,mfinf);
   }
-  
+
   free(dh);
   dh=NULL;
 
 
 
-  
+
   //gui
   int c=-1;
 
-  
+
 
   if(path[strlen(path)-1]=='/'){
     path[strlen(path)-1]=0;
   }
   int sel=0;
+  int prev_sel = 0;
 
   if(*presel>0&&*presel<tsize){
     sel=*presel;
   }
 
+  // batch select
+  int b_sel = 0;
+  int b_d_sel = 0;
+
   while(c!=K_ESC && c!=CTRLX){
 
-   
+
 
     int tw,th;
     term_size(&tw,&th);
@@ -299,6 +311,7 @@ int display_directory(char* path,char** ndirptr,int* presel){
         xele++;
     }
 
+    prev_sel=sel;
     if(c==ARROW_RIGHT){
       sel++;
       if(sel>=tsize){
@@ -329,17 +342,17 @@ int display_directory(char* path,char** ndirptr,int* presel){
       clear();
       nocurs();
 
-    
+
        char* tmp=str_append(path,"/");
        char* imloc=str_append(tmp,mfinf[sel]->name);
        free(tmp);
 
       int status=-1;
-      
+
       #ifndef NO_IMAGE_SUPPORT
-      
+
         status=draw_full_image(imloc);
-      
+
       #endif /* ifndef NO_IMAGE_SUPPORT */
       if(status!=-1)
         wgetch();
@@ -383,27 +396,27 @@ int display_directory(char* path,char** ndirptr,int* presel){
 
         }
 
-               
+
       }else if((exec_cmd=get_default_cmd(mfinf[sel]))!=NULL){
           int cmd_len=strlen(exec_cmd)+1;
           char* cmd_cpy=malloc(sizeof(char)*cmd_len);
           memcpy(cmd_cpy,exec_cmd,sizeof(char)*cmd_len);
 
-          pre_process_cmd_data(&cmd_cpy,path,mfinf[sel]);  
+          pre_process_cmd_data(&cmd_cpy,path,mfinf[sel]);
           padded_terminal_cmd(cmd_cpy,tw,th);
           free(cmd_cpy);
-          
+
 
       }else{
-        char* cmd=input_dialogue("open cmd(%f,%d,%b,%q)",prev_cmd3,tw/3,th>>1,tw/3);
-        
+        char* cmd=input_dialogue("open cmd(%f,%d,%b,%q,%c)",prev_cmd3,tw/3,th>>1,tw/3);
+
 
         if(cmd!=NULL){
           str_cpy(cmd,&prev_cmd3);
 
-          pre_process_cmd_data(&cmd,path,mfinf[sel]);  
+          pre_process_cmd_data(&cmd,path,mfinf[sel]);
 
-         
+
           padded_terminal_cmd(cmd,tw,th);
 
           free(cmd);
@@ -433,7 +446,7 @@ int display_directory(char* path,char** ndirptr,int* presel){
         }
 
     }else if( c == ' ' || c == ':'){
-      show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here\nv - queue file\nx - clear file queue\n\\ - view file queue",tw>>1,th>>1);
+      show_large_popup("press any of:\nr - reload\nt - terminal command\np - show file's full path\nq - quit program\n/ - edit current path\nd - delete\nb - set buffer to path\nc - paste buffer here\nm - move buffer here\nv - queue file\nx - clear file queue\n\\ - view file queue\n[ - toggle batch select\n] - toggle batch de-select",tw>>1,th>>1);
       fflush(stdout);
       int character=wgetch();
       char* cmd=NULL;
@@ -446,10 +459,10 @@ int display_directory(char* path,char** ndirptr,int* presel){
           goto f_refresh;
           break;
         case 't':
-          cmd=input_dialogue("cmd(%d,%f,%b,%q)",prev_cmd2,tw/3,th>>1,tw/3);
+          cmd=input_dialogue("cmd(%d,%f,%b,%q,%c)",prev_cmd2,tw/3,th>>1,tw/3);
           if(cmd!=NULL){
               str_cpy(cmd,&prev_cmd2);
-              pre_process_cmd_data(&cmd,path,mfinf[sel]);  
+              pre_process_cmd_data(&cmd,path,mfinf[sel]);
 
               padded_terminal_cmd(cmd,tw,th);
               free(cmd);
@@ -466,6 +479,14 @@ int display_directory(char* path,char** ndirptr,int* presel){
           fflush(stdout);
           wgetch();
           break;
+         case ']':
+          if(!b_sel)
+              b_d_sel = ~b_d_sel;
+          break;
+         case '[':
+          if(!b_d_sel)
+          b_sel = ~b_sel;
+            break;
          case 'q':
           goto futsu_deguchi;
           break;
@@ -559,7 +580,7 @@ int display_directory(char* path,char** ndirptr,int* presel){
 
 
 
-    
+
 
     clear();
     nocurs();
@@ -597,6 +618,35 @@ int display_directory(char* path,char** ndirptr,int* presel){
         if(cp<tsize){
           load_file(mfinf[cp],path);
           int p=0;
+          if(b_sel){//if batch selected
+              if((cp>=prev_sel&&cp<=sel)||(cp<=prev_sel&&cp>=sel)){
+                    char* tmp=str_append(path,"/");
+                    char* loc=str_append(tmp,mfinf[cp]->name);
+                    free(tmp);
+
+                    if(selection_contains(loc)==-1){
+                        add_element(selection,loc,strlen(loc)+1);
+                    }
+                    free(loc);
+
+
+              }
+          }
+          if(b_d_sel){//if batch de-selected
+              if((cp>=prev_sel&&cp<=sel)||(cp<=prev_sel&&cp>=sel)){
+                    char* tmp=str_append(path,"/");
+                    char* loc=str_append(tmp,mfinf[cp]->name);
+                    free(tmp);
+                    int loc_sel;
+                    if((loc_sel = selection_contains(loc))!=-1){
+                        delete_element(selection,loc_sel);
+                    }
+                    free(loc);
+
+
+              }
+          }
+
           if(get_vec_size(selection)!=0){
               char* tmp=str_append(path,"/");
               char* loc=str_append(tmp,mfinf[cp]->name);
@@ -633,15 +683,15 @@ int display_directory(char* path,char** ndirptr,int* presel){
       print_type[2]=0;
     }else if(filesize>1000000){
       //MegaBytes
-      filesize=filesize/1000000; 
+      filesize=filesize/1000000;
       print_type[0]='M';
       print_type[1]='b';
       print_type[2]=0;
 
-      
+
     }else if(filesize>1000){
       //KBytes
-      filesize=filesize/1000; 
+      filesize=filesize/1000;
       print_type[0]='K';
       print_type[1]='b';
       print_type[2]=0;
@@ -649,6 +699,10 @@ int display_directory(char* path,char** ndirptr,int* presel){
     }
 
     printf("%d/%d %lu%s buffer=%s",sel,tsize-1,filesize,print_type,file_buffer);
+    if(b_sel)
+        printf(" (batch select)");
+    if(b_d_sel)
+        printf(" (batch d-select)");
     refresh();
     c=wgetch();
   }
@@ -701,7 +755,7 @@ int main(int argn,char* argv[]){
   int selected=0;
   while(status!=1){
     if(status==-1){
-      free(dpath); 
+      free(dpath);
       dpath=malloc(sizeof(char)*(strlen(inipath)+1));
 
       memcpy(dpath,inipath,sizeof(char)*(1+strlen(inipath)));
@@ -722,7 +776,7 @@ int main(int argn,char* argv[]){
       status=display_directory(dpath,&tpath,&selected);
     }
   }
-  
+
   free(prev_cmd);
   free(prev_cmd2);
   free(prev_cmd3);
@@ -731,9 +785,9 @@ int main(int argn,char* argv[]){
   free(dpath);
   clear();
   curs();
-  
+
   free_vector(selection);
   free_configs();
-  
+
   return 0;
 }

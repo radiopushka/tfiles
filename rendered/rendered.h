@@ -37,6 +37,7 @@ int draw_full_image(char* file);
 void str_lower(char* input);
 
 
+char* get_clipboard();
 //curses_ operations
 
 
